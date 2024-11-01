@@ -1,0 +1,14 @@
+Opinto-ohjelmani: Tietojenkäsittelytieteen kandidaatti
+
+Projektin ohjelmointikieli: Python
+
+Työssä käytettävä algoritmi: Minimax
+
+Harjoitustyön ydin: 
+- Harjoitustyöni aiheen ydin on saada algoritmi toimimaan tavalla, 
+jossa se tarkastaa lähimmät/ilmeisimmät siirrot ja vastaa niihin siten, 
+että peli jatkuisi mahdollisimman luontevasti. 
+Käytännössä tämä tarkoittaa siis sitä, 
+että algoritmi onnistuisi tekemään mahdollisimman hyvät siirrot omalla vuorollaan.
+
+Ohjelman saamat syötteet: Pelaajien siirrot vuorollaan
