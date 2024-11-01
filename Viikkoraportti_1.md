@@ -11,4 +11,5 @@ Mikä jäi epäselväksi tai tuottanut vaikeuksia?
 - Epäselvää on vielä se kokonaisuus, mitä kaikkea toimiva ristinolla tulee tarvitsemaan, mutta eiköhän se selkene siinä vaiheessa, kun ryhtyy tosissaan tekemään ohjelmaa.
 
 Mitä teen seuraavaksi?
+- Täydennän määrittelydokumenttia tarpeen mukaan.
 - Ryhdyn kehittämään ohjelmaa. Käytännössä seuraan viikko-ohjelmaa ja teen vähintäänkin siinä ilmaistut asiat.
