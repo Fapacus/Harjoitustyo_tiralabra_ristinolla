@@ -4,7 +4,7 @@ Mitä olen tehnyt tällä viikolla?
 - Tällä viikolla olen muodostanut kokonaiskuvaa ristinolla-ohjelman vaatimuksista ja perehtynyt näihin ristinollan osa-alueisiin.
 - Sanoisin, että sain tällä viikolla itselleni käytännössä täysin selväksi minua viime viikolla askarruttaneet kysymykset,
   ja nyt uskon, että minulla on hyvä käsitys minimaxin toiminnasta, heuristiikasta, muunnoksista yms. asioista.
-- [Linkki tämän hetkiseen ohjelmakoodiin](Harjoitustyo_tiralabra_ristinolla/XOXO_hennesy.py)
+- [Linkki tämän hetkiseen ohjelmakoodiin](XOXO_hennesy.py)
   
 Miten ohjelma on edistynyt?
 - Sain tällä viikolla tehtyä ainakin itseäni tyydyttävän pohjan tai muotin ohjelmalle, jonka pohjalta on uskoakseni helppo lähtä kehittämään kokonaisuutta
