@@ -63,7 +63,7 @@ def EvaluateBoard(board, heuristics):
     return score
 
 
-def get_diagonals(board):
+def GetDiagonals(board):
     n = len(board) 
     
     left_diag = []  
@@ -111,7 +111,7 @@ def RowToString(board):
 def BoardToString(board):
     row_list = RowToString(board)
     col_list = ColToString(board)
-    left_diag, right_diag = get_diagonals(board)
+    left_diag, right_diag = GetDiagonals(board)
     
     return row_list, col_list, left_diag, right_diag
 
