@@ -1,3 +1,6 @@
+# Kommentit ja testit vielä uupuu tässä vaiheessa :(
+# Ja vielä itse pelin toiminnassa olisi säätämistä :((
+
 def WinWin(board, last_move):
     rr = 0
     rl = 0
