@@ -1,16 +1,149 @@
-def Minimax(board, heuristics, depth, maxing):
-    if depth == 0:
-        return EvaluateBoard(board, heuristics), None
+def WinWin(board, last_move):
+    rr = 0
+    rl = 0
+    cu = 0
+    cd = 0
+    ldr = 0
+    ldl = 0
+    rdr = 0
+    rdl = 0
+
+    x = last_move[0]
+    y = last_move[1]
+
+    while True:
+        if y == 5:
+            y = last_move[1]
+            break
+        if board[x][y] == board[x][y+1]:
+            rr += 1
+            y += 1
+        else:
+            y = last_move[1]
+            break
+
+    while True:
+        if y == 0:
+            y = last_move[1]
+            break
+        if board[x][y] == board[x][y-1]:
+            rl += 1
+            y -= 1
+        else:
+            y = last_move[1]
+            break
+
+    while True:
+        if x == 0:
+            x = last_move[0]
+            break
+        if board[x][y] == board[x-1][y]:
+            cu += 1
+            x -= 1
+        else:
+            x = last_move[0]
+            break
+
+    while True:
+        if x == 5:
+            x = last_move[0]
+            break
+        if board[x][y] == board[x+1][y]:
+            cd += 1
+            x += 1
+        else:
+            x = last_move[0]
+            break
+
+    while True:
+        if x == 5 or y == 5:
+            x = last_move[0]
+            y = last_move[1]
+            break
+        if board[x][y] == board[x+1][y+1]:
+            ldr += 1
+            x += 1
+            y += 1
+        else:
+            x = last_move[0]
+            y = last_move[1]
+            break
+
+    while True:
+        if x == 0 or y == 0:
+            x = last_move[0]
+            y = last_move[1]
+            break
+        if board[x][y] == board[x-1][y-1]:
+            ldl += 1
+            x -= 1
+            y -= 1
+        else:
+            x = last_move[0]
+            y = last_move[1]
+            break
+
+    while True:
+        if x == 0 or y == 5:
+            x = last_move[0]
+            y = last_move[1]
+            break
+        if board[x][y] == board[x-1][y+1]:
+            rdr += 1
+            x -= 1
+            y += 1
+        else:
+            x = last_move[0]
+            y = last_move[1]
+            break
+
+    while True:
+        if x == 5 or y == 0:
+            x = last_move[0]
+            y = last_move[1]
+            break
+        if board[x][y] == board[x+1][y-1]:
+            rdl += 1
+            x += 1
+            y -= 1
+        else:
+            x = last_move[0]
+            y = last_move[1]
+            break
+    if rr+rl >= 4 or cu+cd >= 4 or ldl+ldr >= 4 or rdl+rdr >= 4:
+        check = True
+    else:
+        check = False
+
+    return check
+
+def Minimax(board, heuristics, depth, maxing, last_move):
 
     best_score = float('-inf') if maxing else float('inf')
     best_move = None
+
+    if WinWin(board, last_move):
+        if maxing:
+            best_score == 1111111111
+            return best_score, last_move
+        else:
+            best_score == -1111111111
+            return best_score, last_move
+    
+    if best_score == 1111111111 or best_score == -1111111111 :
+        return best_score, last_move
+
+    if depth == 0:
+        return EvaluateBoard(board, heuristics), None
+
+    
     
     for row in range(len(board)):
         for col in range(len(board[row])):
             if board[row][col] == ' ': 
-                
-                board[row][col] = "O" if maxing else "X"
-                score, move = Minimax(board, heuristics, depth - 1, not maxing)  
+                board[row][col] = "X" if maxing else "O"
+                last_move = (row, col)
+                score, move = Minimax(board, heuristics, depth - 1, not maxing, last_move)  
                 
                 board[row][col] = ' '
                 
@@ -18,48 +151,45 @@ def Minimax(board, heuristics, depth, maxing):
                     if score > best_score:
                         best_score = score
                         best_move = (row, col)
+                        #print(best_move, best_score)
                 else:
                     if score < best_score:
                         best_score = score
                         best_move = (row, col)
 
-    print("Best move:", best_move, "Best score:", best_score)
     return best_score, best_move
 
-def AiMakesMove(board, heuristics):
+def AiMakesMove(board, heuristics, last_move):
     best_score = float('-inf')
     best_move = None
-    score, move = Minimax(board, heuristics, depth=2, maxing=True)
-    if score > best_score:
+    score, move = Minimax(board, heuristics, depth=2, maxing=True, last_move=last_move)
+    if score < best_score:
         best_score = score
         best_move = move
-    print("BEST MOVE!!!:", best_move, "Best score:", best_score)
-    return best_move
+    return best_move, best_score
 
 def EvaluateBoard(board, heuristics):
     score = 0
     value = 0
     row_list, col_list, left_diag, right_diag = BoardToString(board)
-    print(left_diag)
-    print("******")
-    print(row_list)
+   
 
     for key, value in heuristics.items():
-        #print(row_list)
-        #print(key)
-        #print(heuristics.items())
-        if any(key in row for row in row_list): #key in row_list:
-            #print("HEPPPP!!!!!!!!!!!! ROW", key, "=", value)
+        
+        for row in row_list:
+            if key in row:
+                score += value
+        
+        if any(key in col for col in col_list):
             score += value
-        if any(key in col for col in col_list): #key in col_list:
-            #print("HEPPPP!!!!!!!!!!!! COL", key, "=", value)
+
+        for diag in left_diag:
+            if key in diag:
+                score += value
+       
+        if any(key in diag for diag in right_diag): 
             score += value
-        if any(key in diag for diag in left_diag): #key in left_diag:
-            print("HEPPPP!!!!!!!!!!!! LEFT", key, "=", value)
-            score += value
-        if any(key in diag for diag in right_diag): #key in right_diag:
-            print("HEPPPP!!!!!!!!!!!! RIGHT", key, "=", value)
-            score += value
+
     return score
 
 
@@ -95,8 +225,7 @@ def ColToString(board):
     for col in zip(*board):
         col_string = ''.join(map(str, col))
         col_list.append(col_string)
-    
-    #print(col_list)  
+     
     return col_list
 
 def RowToString(board):
@@ -105,7 +234,6 @@ def RowToString(board):
         row_string = ''.join(map(str, row))
         row_list.append(row_string)
     
-    #print(row_list)  
     return row_list
 
 def BoardToString(board):
@@ -118,52 +246,53 @@ def BoardToString(board):
 def PlayTheGame(board, heuristics):
     for row in board:
         print(row)
-    #print(board)
     move = input("Move pls (row = 1-10, col = a-j):")
-    board[int(move[0])-1][ord(move[1])-97] = "X"
-    for row in board:
-        print(row)
-    BoardToString(board)
-    print("******")
-    aiaiai = AiMakesMove(board, heuristics)
-    print("aiaiai:", aiaiai)
-    print(aiaiai[0], aiaiai[1])
-    print(board)
-    print("boardi on:", board[5][3])
-    board[aiaiai[0]][aiaiai[1]] = "O"
-    print("boardi on nyt:", board[5][3])
-    print(board[aiaiai[0]][aiaiai[1]])
-    print(board)
-    for row in board:
-        print(row)
-    return "Hennesy"
+    board[int(move[0])-1][ord(move[1])-97] = "O"
+    last_move = (int(move[0])-1, ord(move[1])-97)
+    ai, value = AiMakesMove(board, heuristics, last_move)
+    if ai is None:
+        return 1
+    if value == 1111111111:
+        return 2
+    if value == -1111111111:
+        return 1
+    
+    board[int(ai[0])][int(ai[1])] = "X"
+    return 0
 
 def RollTheGame(board, heuristics):
     counter = 0
     while True:
-        PlayTheGame(board, heuristics)
-        counter += 1
-        if counter == 10:
+        Hero = PlayTheGame(board, heuristics)
+        #print(board)
+        if Hero == 1: 
+            print("Game over, O won the game!")
             break
+        if Hero == 2:
+            print("Game over, X won the game!")
+            break
+        else:
+            counter += 1
+            if counter == 10:
+                break
     return "Hennesy"
 
 if __name__ == "__main__":
     
-    board_size = 10
-    make_a_board = [["_" for i in range(board_size)] for j in range(board_size)]
+    #board_size = 10
+    #make_a_board = [[" " for i in range(board_size)] for j in range(board_size)]
     board = [
     [" ","X"," "," "," ","O"],
-    [" ","X","X","O","O"," "],
-    [" ","X","O","X"," "," "],
-    [" "," "," "," "," "," "],
-    ["O","O"," ","O","O","X"],
+    [" ","X"," ","O","O"," "],
+    [" ","X","O"," "," "," "],
+    [" "," "," "," ","X"," "],
+    ["O"," "," ","O","O","X"],
     ["X"," ","X"," "," "," "]
     ]
 
     
     heuristics = {
-        "XXXXX": 100000000,
-        "OOOOO": -100000000,
+        
         " XXXX ": 50000000,
         " OOOO ": -50000000,
         "XXXX ": 1000000,
@@ -180,12 +309,11 @@ if __name__ == "__main__":
         "  OOO  ": -50000,
         " XXX ": 20000,
         " OOO ": -20000,
-        " XX ": 4,
-        " OO ": -4,
+        " XX ": 40,
+        " OO ": -40,
         
         " X ": 1,
         " O ": -1  
     }
 
-    #print(PlayTheGame(make_a_board))
     RollTheGame(board, heuristics)
