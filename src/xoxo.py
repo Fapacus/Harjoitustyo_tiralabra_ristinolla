@@ -1,7 +1,28 @@
-# kunnon testit vielä uupuu tässä vaiheessa :(
-# virheellisten inputtien tarkistus puuttuu
+def update_possible_moves(board, possible_moves, last_move):
+    moves_set = set(possible_moves)
+    x = last_move[0]
+    y = last_move[1]
 
-def IsItDraw(board):
+    limit = len(board)-1
+
+    for i in range(x-2, x+3):
+        if i < 0:
+            continue
+        if i > limit:
+            break
+        for j in range(y-2, y+3):
+            if j < 0:
+                continue
+            if j > limit:
+                break
+            if board[i][j] == " ":
+                moves_set.add((i,j))
+                #print(moves_set)
+    moves_set.discard(last_move)
+    
+    return moves_set
+
+def is_it_draw(board):
     """
     Checks if the board is full and in that case calls a draw.
 
@@ -16,8 +37,7 @@ def IsItDraw(board):
             return False
     return True
 
-def WinWin(board, last_move):
-    
+def win_win(board, last_move):
     """
     Checks if the game has been won after a move.
 
@@ -148,7 +168,7 @@ def WinWin(board, last_move):
 
     return check
 
-def Minimax(board, heuristics, depth, maxing, last_move):
+def minimax(board, heuristics, depth, maxing, last_move, possible_moves):
 
     """
     Checks if the game has been won or drawn, 
@@ -164,56 +184,51 @@ def Minimax(board, heuristics, depth, maxing, last_move):
     Returns:
         Best move and its score.
     """
-    
     best_score = float('-inf') if maxing else float('inf')
     best_move = None
 
-    if WinWin(board, last_move):
+    if win_win(board, last_move):
         if not maxing:
             best_score = int(1111111111)
             return best_score, last_move
-        else:
-            best_score = int(-1111111111)
-            return best_score, last_move
-    if best_score == 1111111111 or best_score == -1111111111 :
+        best_score = int(-1111111111)
         return best_score, last_move
+    
 
-    if IsItDraw(board):
+    if is_it_draw(board):
         return None, last_move
 
     if depth == 0:
-        score = EvaluateBoard(board, heuristics)
+        score = evaluate_board(board, heuristics)
         return score, None
 
-    
-    
-    for row in range(len(board)):
-        for col in range(len(board[row])):
-            if board[row][col] == ' ': 
-                board[row][col] = "X" if maxing else "O"
-                last_move = (row, col)
-                score, move = Minimax(board, heuristics, depth - 1, not maxing, last_move)  
-                
-                board[row][col] = ' '
-                
-                if maxing:
-                    if score == None:
-                        board[row][col] = "X" if maxing else "O"
-                        return score, last_move
-                    if score > best_score:
-                        best_score = score
-                        best_move = (row, col)
-    
-                else:
-                    if score < best_score:
-                        best_score = score
-                        best_move = (row, col)
+    for move in possible_moves:
+        row, col = move
+        if board[row][col] == ' ':
+            board[row][col] = "X" if maxing else "O"
+            last_move = (row, col)
+
+            new_possible_moves = update_possible_moves(board, possible_moves, last_move)
+
+            score, _ = minimax(board, heuristics, depth - 1, not maxing, last_move, new_possible_moves)           
+            board[row][col] = ' '
+            if maxing:
+                if score is None:
+                    board[row][col] = "X" if maxing else "O"
+                    return score, last_move
+                if score > best_score:
+                    best_score = score
+                    best_move = (row, col)
+            else:
+                if score < best_score:
+                    best_score = score
+                    best_move = (row, col)
 
     return best_score, best_move
 
-def AiMakesMove(board, heuristics, last_move):
+def ai_makes_move(board, heuristics, last_move, possible_moves):
     """
-    Calls the Minimax function to make a move.
+    Calls the minimax function to make a move.
 
     Args:
         board: The current board.
@@ -225,9 +240,9 @@ def AiMakesMove(board, heuristics, last_move):
     """
     best_score = float('-inf')
     best_move = None
-    score, move = Minimax(board, heuristics, depth=2, maxing=True, last_move=last_move)
+    score, move = minimax(board, heuristics, depth=2, maxing=True, last_move=last_move, possible_moves=possible_moves)
 
-    if score == None:
+    if score is None:
         return last_move, score
     if score > best_score:
         best_score = score
@@ -235,8 +250,7 @@ def AiMakesMove(board, heuristics, last_move):
     print("Paras moovi ja pisteet sille: ",best_move, best_score)
     return best_move, best_score
 
-def EvaluateBoard(board, heuristics):
-    
+def evaluate_board(board, heuristics):
     """
     Evaluates the current board based on the given heuristics.
 
@@ -249,15 +263,12 @@ def EvaluateBoard(board, heuristics):
     """
     score = 0
     value = 0
-    row_list, col_list, left_diag, right_diag = BoardToString(board)
-   
+    row_list, col_list, left_diag, right_diag = board_to_string(board)
 
     for key, value in heuristics.items():
-        
         for row in row_list:
             if key in row:
                 score += value
-        
         for col in col_list:
             if key in col:
                 score += value
@@ -265,15 +276,14 @@ def EvaluateBoard(board, heuristics):
         for diag in left_diag:
             if key in diag:
                 score += value
-       
         for diag in right_diag:
-            if key in diag: 
+            if key in diag:
                 score += value
 
     return score
 
 
-def DiagonalsToStrings(board):
+def diagonals_to_strings(board):
     """
     Converts the board into two lists of strings representing diagonals from left and right.
 
@@ -329,7 +339,7 @@ def DiagonalsToStrings(board):
     return left_diag, right_diag
 
 
-def ColToString(board):
+def col_to_string(board):
     """
     Converts the board into a list of strings representing columns.
 
@@ -339,7 +349,6 @@ def ColToString(board):
     Returns:
         A list of strings representing columns.
     """
-    
     col_list = []
     n = len(board)
 
@@ -352,7 +361,7 @@ def ColToString(board):
 
     return col_list
 
-def RowToString(board):
+def row_to_string(board):
     """
     Converts the board into a list of strings representing rows.
 
@@ -366,10 +375,9 @@ def RowToString(board):
     for row in board:
         row_string = ''.join(row)
         row_list.append(row_string)
-    
     return row_list
 
-def BoardToString(board):
+def board_to_string(board):
     """
     Calls the converting functions to convert the board into lists of strings.
 
@@ -379,51 +387,54 @@ def BoardToString(board):
     Returns:
         Four lists of strings representing rows, columns, left diagonals and right diagonals.
     """
-    row_list = RowToString(board)
-    col_list = ColToString(board)
-    left_diag, right_diag = DiagonalsToStrings(board)
-    
+    row_list = row_to_string(board)
+    col_list = col_to_string(board)
+    left_diag, right_diag = diagonals_to_strings(board)
     return row_list, col_list, left_diag, right_diag
 
-def PlayTheGame(board, heuristics):
+def play_the_game(board, heuristics, possible_moves):
     """
     Asks the player to make a move and calls the AI to make a move. 
-    Makes the final moves and passes the continution information of the game to the RollTheGame function.
+    Makes the final moves and passes the continution information 
+    of the game to the roll_the_game function.
 
     Args:
         board: The current board.
         heuristics: A dictionary with patterns and values.
 
     Returns:
-        Returns 3 for a draw, 1 for a win by the human, or 2 for a win by the AI, and 0 if the game is not over. 
+        Returns 3 for a draw, 1 for a win by the human, 
+        or 2 for a win by the AI, and 0 if the game is not over. 
     """
     for row in board:
         print(row)
     print("")
+    
+
     move = input("Move pls (row = 1-6, col = a-f) (example: 1a or 5b): ")
     board[int(move[0])-1][ord(move[1])-97] = "O"
+    
+    possible_moves = update_possible_moves(board, possible_moves, (int(move[0])-1, ord(move[1])-97))
+    print(possible_moves)
     for row in board:
         print(row)
     print("")
     last_move = (int(move[0])-1, ord(move[1])-97)
-    ai, value = AiMakesMove(board, heuristics, last_move)
+    ai, value = ai_makes_move(board, heuristics, last_move, possible_moves)
 
     if ai is None:
         return 1
-    
-    board[int(ai[0])][int(ai[1])] = "X"
-    
     if value == 1111111111:
+        board[int(ai[0])][int(ai[1])] = "X"
         return 2
     if value == -1111111111:
         return 1
-    if value == None:
+    if value is None:
         return 3
-    
-    
+    board[int(ai[0])][int(ai[1])] = "X"
     return 0
 
-def RollTheGame(board, heuristics):
+def roll_the_game(board, heuristics, possible_moves):
     """
     Keeps the game going until either player wins or the board is full.
 
@@ -434,35 +445,32 @@ def RollTheGame(board, heuristics):
     Returns:
         Breaks the game roll and prints the result in case of a win or draw.
     """
-    counter = 0
     while True:
-        Hero = PlayTheGame(board, heuristics)
-        if Hero == 1: 
+        hero = play_the_game(board, heuristics, possible_moves)
+        if hero == 1:
             print("Game over, O won the game!")
             break
-        if Hero == 2:
+        if hero == 2:
             print("Game over, X won the game!")
             break
-        if Hero == 3:
+        if hero == 3:
             print("Game over, draw!")
             break
-        else:
-            continue
+        continue
     for row in board:
         print(row)
+    print("")
     return "Hennesy"
 
 if __name__ == "__main__":
-    
     #board_size = 10
     #make_a_board = [[" " for i in range(board_size)] for j in range(board_size)]
-    
     board = [
     [" "," "," "," "," ","O"],
     [" ","X"," ","O","O"," "],
-    [" ","X","O"," "," "," "],
-    [" ","X"," "," ","X"," "],
-    ["O"," "," ","O","O","X"],
+    [" ","X","O","O"," "," "],
+    [" ","X"," ","O","X"," "],
+    ["O"," ","O","O","O","X"],
     ["X","X","X"," "," "," "]
     ]
 
@@ -494,7 +502,6 @@ if __name__ == "__main__":
     ]
 
     heuristics = {
-        
         " XXXX ": 50000000,
         " OOOO ": -50000000,
         "XXXX ": 1000000,
@@ -513,12 +520,13 @@ if __name__ == "__main__":
         " OOO ": -20000,
         " XX ": 40,
         " OO ": -40,
-        
         " X ": 1,
         " O ": -1  
     }
 
-    RollTheGame(board, heuristics)
-    #RollTheGame(board1, heuristics)
-    #RollTheGame(board2, heuristics)
-    #RollTheGame(board3, heuristics)
+    possible_moves = []
+
+    roll_the_game(board, heuristics, possible_moves)
+    roll_the_game(board1, heuristics, possible_moves)
+    roll_the_game(board2, heuristics, possible_moves)
+    #roll_the_game(board3, heuristics)
