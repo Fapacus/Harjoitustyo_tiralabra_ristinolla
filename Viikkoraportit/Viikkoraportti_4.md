@@ -3,7 +3,7 @@ Käytin tällä viikolla aikaa kurssiin noin 10 tuntia.
 Mitä olen tehnyt tällä viikolla?
 - Tällä viikolla aika on menny enimmäkseen bugien etsimiseen ja korjaamiseen.
 - Lisäksi aloin lisätä ristinollaan viiden peräkkäisen merkin tarkistusta (ja tasapelin tarkistusta), joka ei sinällään vaikuttanut olevan sen ihmeempi asia, mutta säätämistä tuotti mm. toiminnon sijoittaminen, enkä päässyt asiassa vielä päätökseen.
-- [Linkki tämän hetkiseen ohjelmakoodiin](xoxo_hennesy.py)
+- [Linkki tämän hetkiseen ohjelmakoodiin](xoxo.py)
   
 Miten ohjelma on edistynyt?
 - Ohjelma on edistynyt tällä viikolla bugien poiston ja lisäominaisuuden (voiton tarkitus) lisäämisellä.
