@@ -1,4 +1,15 @@
 def update_possible_moves(board, possible_moves, last_move):
+    """
+    Updates the possible moves based on the last move.
+
+    Args:
+        board: The current board.
+        possible_moves: The possible moves.
+        last_move: The last move made.
+
+    Returns:
+        The updated possible moves.
+    """
     moves_set = set(possible_moves)
     x = last_move[0]
     y = last_move[1]
@@ -17,25 +28,11 @@ def update_possible_moves(board, possible_moves, last_move):
                 break
             if board[i][j] == " ":
                 moves_set.add((i,j))
-                #print(moves_set)
+            
     moves_set.discard(last_move)
     
     return moves_set
 
-def is_it_draw(board):
-    """
-    Checks if the board is full and in that case calls a draw.
-
-    Args:
-        board: The current board.
-
-    Returns:
-        True if the board is full, False otherwise.
-    """
-    for row in board:
-        if " " in row:
-            return False
-    return True
 
 def win_win(board, last_move):
     """
@@ -84,6 +81,9 @@ def win_win(board, last_move):
             y = last_move[1]
             break
 
+    if rr+rl >= 4:
+        return True
+
     while True:
         if x == 0:
             x = last_move[0]
@@ -105,6 +105,8 @@ def win_win(board, last_move):
         else:
             x = last_move[0]
             break
+    if cu+cd >= 4:
+        return True
 
     while True:
         if x == limit or y == limit:
@@ -133,6 +135,9 @@ def win_win(board, last_move):
             x = last_move[0]
             y = last_move[1]
             break
+    
+    if ldr+ldl >= 4:
+        return True
 
     while True:
         if x == 0 or y == limit:
@@ -161,12 +166,11 @@ def win_win(board, last_move):
             x = last_move[0]
             y = last_move[1]
             break
-    if rr+rl >= 4 or cu+cd >= 4 or ldl+ldr >= 4 or rdl+rdr >= 4:
-        check = True
-    else:
-        check = False
 
-    return check
+    if rdl+rdr >= 4:
+        return True
+    
+    return False
 
 def minimax(board, heuristics, depth, maxing, last_move, possible_moves):
 
@@ -189,13 +193,13 @@ def minimax(board, heuristics, depth, maxing, last_move, possible_moves):
 
     if win_win(board, last_move):
         if not maxing:
-            best_score = int(1111111111)
+            best_score = int(1111111111)*depth
             return best_score, last_move
-        best_score = int(-1111111111)
+        best_score = int(-1111111111)*depth
         return best_score, last_move
     
 
-    if is_it_draw(board):
+    if len(possible_moves) == 0:
         return None, last_move
 
     if depth == 0:
@@ -240,7 +244,7 @@ def ai_makes_move(board, heuristics, last_move, possible_moves):
     """
     best_score = float('-inf')
     best_move = None
-    score, move = minimax(board, heuristics, depth=2, maxing=True, last_move=last_move, possible_moves=possible_moves)
+    score, move = minimax(board, heuristics, depth=3, maxing=True, last_move=last_move, possible_moves=possible_moves)
 
     if score is None:
         return last_move, score
@@ -415,7 +419,6 @@ def play_the_game(board, heuristics, possible_moves):
     board[int(move[0])-1][ord(move[1])-97] = "O"
     
     possible_moves = update_possible_moves(board, possible_moves, (int(move[0])-1, ord(move[1])-97))
-    print(possible_moves)
     for row in board:
         print(row)
     print("")
@@ -424,10 +427,10 @@ def play_the_game(board, heuristics, possible_moves):
 
     if ai is None:
         return 1
-    if value == 1111111111:
+    if value == 1111111111*2:
         board[int(ai[0])][int(ai[1])] = "X"
         return 2
-    if value == -1111111111:
+    if value == -1111111111*3:
         return 1
     if value is None:
         return 3
@@ -465,6 +468,15 @@ def roll_the_game(board, heuristics, possible_moves):
 if __name__ == "__main__":
     #board_size = 10
     #make_a_board = [[" " for i in range(board_size)] for j in range(board_size)]
+    board0 = [
+    [" "," "," "," "," "," "],
+    [" "," "," "," "," "," "],
+    [" ","X","X","X"," "," "],
+    [" "," "," "," "," "," "],
+    [" ","O","O","O"," "," "],
+    [" "," "," "," "," "," "]
+    ]
+    
     board = [
     [" "," "," "," "," ","O"],
     [" ","X"," ","O","O"," "],
@@ -525,8 +537,15 @@ if __name__ == "__main__":
     }
 
     possible_moves = []
+    def make_possible_moves(board):
+        for row in range(len(board)):
+            for col in range(len(board)):
+                if board[row][col] != " ":
+                    possible_move = update_possible_moves(board, possible_moves, (row, col))
+        return possible_move
 
-    roll_the_game(board, heuristics, possible_moves)
-    roll_the_game(board1, heuristics, possible_moves)
-    roll_the_game(board2, heuristics, possible_moves)
-    #roll_the_game(board3, heuristics)
+    roll_the_game(board0, heuristics, make_possible_moves(board0))
+    roll_the_game(board, heuristics, make_possible_moves(board))
+    roll_the_game(board1, heuristics, make_possible_moves(board1))
+    roll_the_game(board2, heuristics, make_possible_moves(board2))
+    #roll_the_game(board3, heuristics, make_possible_moves(board3))

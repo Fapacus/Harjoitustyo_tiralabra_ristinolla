@@ -53,7 +53,7 @@ class TestXoxo(unittest.TestCase):
         last_move = (3, 3)
         self.assertFalse(xoxo.win_win(board, last_move))
 
-    def test_win_diagonal(self):
+    def test_win_diagonal_left(self):
         board = [
             [" ", " ", " ", " ", " ", " "],
             [" ", "X", " ", "X", " ", " "],
@@ -65,7 +65,7 @@ class TestXoxo(unittest.TestCase):
         last_move = (1, 1)
         self.assertTrue(xoxo.win_win(board, last_move))
     
-    def test_win_diagonal(self):
+    def test_win_diagonal_left(self):
         board = [
             [" ", " ", " ", " ", " ", " "],
             [" ", "X", " ", "X", " ", " "],
@@ -77,7 +77,7 @@ class TestXoxo(unittest.TestCase):
         last_move = (5, 5)
         self.assertFalse(xoxo.win_win(board, last_move))
 
-    def test_win_diagonal(self):
+    def test_win_diagonal_right(self):
         board = [
             [" ", " ", " ", " ", " ", "X"],
             [" ", "X", " ", "X", "X", " "],
@@ -89,7 +89,7 @@ class TestXoxo(unittest.TestCase):
         last_move = (4, 1)
         self.assertTrue(xoxo.win_win(board, last_move))
 
-    def test_win_diagonal(self):
+    def test_win_diagonal_right(self):
         board = [
             [" ", " ", " ", " ", " ", "X"],
             [" ", "X", " ", "X", "X", " "],
