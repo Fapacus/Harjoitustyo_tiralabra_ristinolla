@@ -1,3 +1,6 @@
+import time
+
+
 def update_possible_moves(board, possible_moves, last_move):
     """
     Updates the possible moves based on the last move.
@@ -16,12 +19,12 @@ def update_possible_moves(board, possible_moves, last_move):
 
     limit = len(board)-1
 
-    for i in range(x-2, x+3):
+    for i in range(x-3, x+3):
         if i < 0:
             continue
         if i > limit:
             break
-        for j in range(y-2, y+3):
+        for j in range(y-3, y+3):
             if j < 0:
                 continue
             if j > limit:
@@ -34,7 +37,7 @@ def update_possible_moves(board, possible_moves, last_move):
     return moves_set
 
 
-def win_win(board, last_move):
+def win_win(board, last_move, depth):
     """
     Checks if the game has been won after a move.
 
@@ -172,7 +175,7 @@ def win_win(board, last_move):
     
     return False
 
-def minimax(board, heuristics, depth, maxing, last_move, possible_moves):
+def minimax(board, heuristics, depth, maxing, last_move, possible_moves, alpha=float('-inf'), beta=float('inf')):
 
     """
     Checks if the game has been won or drawn, 
@@ -191,11 +194,11 @@ def minimax(board, heuristics, depth, maxing, last_move, possible_moves):
     best_score = float('-inf') if maxing else float('inf')
     best_move = None
 
-    if win_win(board, last_move):
+    if win_win(board, last_move, depth):
         if not maxing:
-            best_score = int(1111111111)*depth
+            best_score = int(1111111111)*(depth**depth)
             return best_score, last_move
-        best_score = int(-1111111111)*depth
+        best_score = int(-1111111111)*(depth**depth)
         return best_score, last_move
     
 
@@ -205,7 +208,7 @@ def minimax(board, heuristics, depth, maxing, last_move, possible_moves):
     if depth == 0:
         score = evaluate_board(board, heuristics)
         return score, None
-
+    
     for move in possible_moves:
         row, col = move
         if board[row][col] == ' ':
@@ -214,7 +217,7 @@ def minimax(board, heuristics, depth, maxing, last_move, possible_moves):
 
             new_possible_moves = update_possible_moves(board, possible_moves, last_move)
 
-            score, _ = minimax(board, heuristics, depth - 1, not maxing, last_move, new_possible_moves)           
+            score, _ = minimax(board, heuristics, depth - 1, not maxing, last_move, new_possible_moves, alpha, beta)           
             board[row][col] = ' '
             if maxing:
                 if score is None:
@@ -223,14 +226,20 @@ def minimax(board, heuristics, depth, maxing, last_move, possible_moves):
                 if score > best_score:
                     best_score = score
                     best_move = (row, col)
+                alpha = max(alpha, score)
             else:
                 if score < best_score:
                     best_score = score
                     best_move = (row, col)
+                beta = min(beta, score)
+
+            if beta <= alpha:
+                break
 
     return best_score, best_move
 
-def ai_makes_move(board, heuristics, last_move, possible_moves):
+def ai_makes_move(board, heuristics, last_move, possible_moves, depth):
+    start_time = time.time()
     """
     Calls the minimax function to make a move.
 
@@ -244,14 +253,15 @@ def ai_makes_move(board, heuristics, last_move, possible_moves):
     """
     best_score = float('-inf')
     best_move = None
-    score, move = minimax(board, heuristics, depth=3, maxing=True, last_move=last_move, possible_moves=possible_moves)
+    score, move = minimax(board, heuristics, depth, maxing=True, last_move=last_move, possible_moves=possible_moves, alpha=float('-inf'), beta=float('inf'))
 
     if score is None:
         return last_move, score
     if score > best_score:
         best_score = score
         best_move = move
-    print("Paras moovi ja pisteet sille: ",best_move, best_score)
+    end_time = time.time()
+    print("Aika: ", end_time - start_time)
     return best_move, best_score
 
 def evaluate_board(board, heuristics):
@@ -410,27 +420,28 @@ def play_the_game(board, heuristics, possible_moves):
         Returns 3 for a draw, 1 for a win by the human, 
         or 2 for a win by the AI, and 0 if the game is not over. 
     """
-    for row in board:
-        print(row)
-    print("")
-    
+    draw_board(board)
 
-    move = input("Move pls (row = 1-6, col = a-f) (example: 1a or 5b): ")
+    while True:
+        move = input("Move pls, row first then col (row = 1-6, col = a-f) (example: 1a or 5b): ")
+        if move[0] not in "123456" or move[1] not in "abcdef" or board[int(move[0])-1][ord(move[1])-97] != " ":
+            print("Invalid move, try again.")
+            continue
+        break
     board[int(move[0])-1][ord(move[1])-97] = "O"
     
     possible_moves = update_possible_moves(board, possible_moves, (int(move[0])-1, ord(move[1])-97))
-    for row in board:
-        print(row)
-    print("")
+    draw_board(board)
     last_move = (int(move[0])-1, ord(move[1])-97)
-    ai, value = ai_makes_move(board, heuristics, last_move, possible_moves)
+    depth = 5
+    ai, value = ai_makes_move(board, heuristics, last_move, possible_moves, depth)
 
     if ai is None:
         return 1
-    if value == 1111111111*2:
+    if value == 1111111111*((depth-1)**(depth-1)):
         board[int(ai[0])][int(ai[1])] = "X"
         return 2
-    if value == -1111111111*3:
+    if value == -1111111111*(depth**depth):
         return 1
     if value is None:
         return 3
@@ -460,10 +471,23 @@ def roll_the_game(board, heuristics, possible_moves):
             print("Game over, draw!")
             break
         continue
-    for row in board:
-        print(row)
-    print("")
+    draw_board(board)
     return "Hennesy"
+
+def draw_board(board):
+    """
+    Draws the board in the terminal.
+
+    Args:
+        board: The current board.
+
+    Returns:
+        None
+    """
+    print("   " + " ".join("a b c d e f".split()))
+    for i, row in enumerate(board, 1):
+         print(f"{i} " + "|" + "|".join(row) + "|")
+    print("")
 
 if __name__ == "__main__":
     #board_size = 10
