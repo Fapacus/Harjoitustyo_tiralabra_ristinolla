@@ -15,4 +15,4 @@ ja toiseksi näihin tilanteisiin tarkoituksenmukaisen reagoinnin.
 
 Ohjelman saamat syötteet: Pelaajien siirrot vuorollaan
 
-Ohjelman vaatimusmäärittely:
+[Linkki ohjelman vaatimusmäärittelyyn](vaatimusmaarittely.md)
