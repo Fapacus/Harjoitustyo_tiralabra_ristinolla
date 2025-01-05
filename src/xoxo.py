@@ -238,7 +238,7 @@ def minimax(board, heuristics, depth, maxing, last_move, possible_moves, alpha=f
 
     return best_score, best_move
 
-def ai_makes_move(board, heuristics, last_move, possible_moves, depth):
+def ai_makes_move(board, heuristics, last_move, possible_moves, depth): # out of testing coverage, because endcome covered in other tests # pragma: no cover
     start_time = time.time()
     """
     Calls the minimax function to make a move.
@@ -247,6 +247,8 @@ def ai_makes_move(board, heuristics, last_move, possible_moves, depth):
         board: The current board.
         heuristics: A dictionary with patterns and values.
         last_move: The last move made.
+        possible_moves: A list of possible moves.
+        depth: The max depth of the search.
 
     Returns:
         Best move and its score unless draw has been detected.
@@ -309,7 +311,7 @@ def evaluate_board(board, heuristics, maxing):
                     else:
                         score += value
     
-    else:
+    else:   # out of testing coverage, because of never using this block with depth of 4 # pragma: no cover
         for key, value in heuristics.items():
             for row in row_list:
                 if key in row:
@@ -347,7 +349,7 @@ def board_to_string(board):
     left_diag, right_diag = conversions.diagonals_to_strings(board)
     return row_list, col_list, left_diag, right_diag
 
-def play_the_game(board, heuristics, possible_moves):
+def play_the_game(board, heuristics, possible_moves): # out of test coverage, because this function is full of inputs and prints, and is UI-like and kind of covered in other tests # pragma: no cover
     """
     Asks the player to make a move and calls the AI to make a move. 
     Makes the final moves and passes the continuation information 
@@ -440,7 +442,7 @@ def play_the_game(board, heuristics, possible_moves):
     board[int(ai[0])][int(ai[1])] = "X"
     return 0, ai
 
-def roll_the_game(board, heuristics, possible_moves):
+def roll_the_game(board, heuristics, possible_moves): # out of test coverage, because this function is UI-like and also covered in other tests # pragma: no cover
     """
     Keeps the game going until either player wins or the board is full.
 
@@ -469,7 +471,7 @@ def roll_the_game(board, heuristics, possible_moves):
     draw_board(board)
     return "Hennesy"
 
-def draw_board(board):
+def draw_board(board): # out of test coverage,because function only prints and has no return # pragma: no cover
     """
     Draws the board in the terminal.
 
