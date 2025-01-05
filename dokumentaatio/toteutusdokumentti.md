@@ -7,7 +7,7 @@
 
 ## Saavutetut aika- ja tilavaativudet
 - Ohjelman vaativuutta on rajoitettu tähän mennessä rajoittamalla rekursiivista syvyyttä ja uutena asiana rajoittamalla tarkasteltavien siirtojen määrä aikaisemmista siirroista maksimissaan kahden ruudun päässä oleviin siirtoihin.
-- Ohjelman aikavaatimuuden määrittelee käytännössä minimax-algoritmi, jonka aikavaativuus on O({mahdolliset siirrot}^{etsinnän syvyys}) eli **O(m^e) ja tilavaativuus on O({mahdolliset siirrot}*{etsinnän syvyys}) eli O(me).
+- Ohjelman aikavaatimuuden määrittelee käytännössä minimax-algoritmi, jonka aikavaativuus on O({mahdolliset siirrot}^{etsinnän syvyys}) eli **O(m^e)** ja tilavaativuus on O({mahdolliset siirrot}*{etsinnän syvyys}) eli **O(me)**.
 
 ## Puutteet ja parannusehdotukset
 - Graafinen käyttöliittymä, jotta pelikokemus paranisi.
