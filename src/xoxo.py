@@ -1,4 +1,5 @@
 import time
+import conversions
 
 
 def update_possible_moves(board, possible_moves, last_move):
@@ -13,31 +14,32 @@ def update_possible_moves(board, possible_moves, last_move):
     Returns:
         The updated possible moves.
     """
+    
     moves_set = set(possible_moves)
     x = last_move[0]
     y = last_move[1]
 
     limit = len(board)-1
 
-    for i in range(x-3, x+3):
+    for i in range(x-2, x+3):
         if i < 0:
             continue
         if i > limit:
             break
-        for j in range(y-3, y+3):
+        for j in range(y-2, y+3):
             if j < 0:
                 continue
             if j > limit:
                 break
             if board[i][j] == " ":
                 moves_set.add((i,j))
-            
+    
     moves_set.discard(last_move)
     
+
     return moves_set
-
-
-def win_win(board, last_move, depth):
+   
+def win_win(board, last_move):
     """
     Checks if the game has been won after a move.
 
@@ -108,6 +110,7 @@ def win_win(board, last_move, depth):
         else:
             x = last_move[0]
             break
+
     if cu+cd >= 4:
         return True
 
@@ -194,7 +197,8 @@ def minimax(board, heuristics, depth, maxing, last_move, possible_moves, alpha=f
     best_score = float('-inf') if maxing else float('inf')
     best_move = None
 
-    if win_win(board, last_move, depth):
+    
+    if win_win(board, last_move):
         if not maxing:
             best_score = int(1111111111)*(depth**depth)
             return best_score, last_move
@@ -206,7 +210,7 @@ def minimax(board, heuristics, depth, maxing, last_move, possible_moves, alpha=f
         return None, last_move
 
     if depth == 0:
-        score = evaluate_board(board, heuristics)
+        score = evaluate_board(board, heuristics, maxing)
         return score, None
     
     for move in possible_moves:
@@ -216,13 +220,9 @@ def minimax(board, heuristics, depth, maxing, last_move, possible_moves, alpha=f
             last_move = (row, col)
 
             new_possible_moves = update_possible_moves(board, possible_moves, last_move)
-
             score, _ = minimax(board, heuristics, depth - 1, not maxing, last_move, new_possible_moves, alpha, beta)           
             board[row][col] = ' '
             if maxing:
-                if score is None:
-                    board[row][col] = "X" if maxing else "O"
-                    return score, last_move
                 if score > best_score:
                     best_score = score
                     best_move = (row, col)
@@ -261,16 +261,18 @@ def ai_makes_move(board, heuristics, last_move, possible_moves, depth):
         best_score = score
         best_move = move
     end_time = time.time()
-    print("Aika: ", end_time - start_time)
+    print("Time: ", end_time - start_time)
+    print(f"AI's move: {int(best_move[0]+1)}{chr(best_move[1]+97)}")
     return best_move, best_score
 
-def evaluate_board(board, heuristics):
+def evaluate_board(board, heuristics, maxing):
     """
     Evaluates the current board based on the given heuristics.
 
     Args:
         board: The current board.
         heuristics: heuristics: A dictionary with patterns and values.
+        maxing: Whether the AI is maximizing or minimizing.
 
     Returns:
         The score of the board.
@@ -278,118 +280,57 @@ def evaluate_board(board, heuristics):
     score = 0
     value = 0
     row_list, col_list, left_diag, right_diag = board_to_string(board)
+    print(maxing)
+    if maxing:
+        for key, value in heuristics.items():
+            for row in row_list:
+                if key in row:
+                    if value > 0:
+                        score += value*2
+                    else:
+                        score += value
+            for col in col_list:
+                if key in col:
+                    if value > 0:
+                        score += value*2
+                    else:
+                        score += value
 
-    for key, value in heuristics.items():
-        for row in row_list:
-            if key in row:
-                score += value
-        for col in col_list:
-            if key in col:
-                score += value
+            for diag in left_diag:
+                if key in diag:
+                    if value > 0:
+                        score += value*2
+                    else:
+                        score += value
+            for diag in right_diag:
+                if key in diag:
+                    if value > 0:
+                        score += value*2
+                    else:
+                        score += value
+    
+    else:
+        for key, value in heuristics.items():
+            for row in row_list:
+                if key in row:
+                    if value < 0:
+                        score += value
+                    else:
+                        score += value
+            for col in col_list:
+                if key in col:
+                    if value < 0:
+                        score += value
+                    else:
+                        score += value
 
-        for diag in left_diag:
-            if key in diag:
-                score += value
-        for diag in right_diag:
-            if key in diag:
-                score += value
-
+            for diag in left_diag:
+                if key in diag:
+                    if value < 0:
+                        score += value
+                    else:
+                        score += value
     return score
-
-
-def diagonals_to_strings(board):
-    """
-    Converts the board into two lists of strings representing diagonals from left and right.
-
-    Args:
-        board: The current board.
-
-    Returns:
-        Two lists of strings representing left and right diagonals.
-    """
-    limit = len(board) - 1
-    n = limit - 4
-
-    left_diag = []
-
-    for start_row in range(n):
-        diag = []
-        row, col = start_row, 0
-        while row < limit and col < limit:
-            diag.append(board[row][col])
-            row += 1
-            col += 1
-        left_diag.append(''.join(diag))
-
-    for start_col in range(1, n):
-        diag = []
-        row, col = 0, start_col
-        while row < limit and col < limit:
-            diag.append(board[row][col])
-            row += 1
-            col += 1
-        left_diag.append(''.join(diag))
-
-    right_diag = []
-
-    for start_row in range(n):
-        diag = []
-        row, col = start_row, limit
-        while row < limit and col >= 0:
-            diag.append(board[row][col])
-            row += 1
-            col -= 1
-        right_diag.append(''.join(diag))
-
-    for start_col in range(n - 2, -1, -1):
-        diag = []
-        row, col = 0, start_col
-        while row < limit and col >= 0:
-            diag.append(board[row][col])
-            row += 1
-            col -= 1
-        right_diag.append(''.join(diag))
-
-    return left_diag, right_diag
-
-
-def col_to_string(board):
-    """
-    Converts the board into a list of strings representing columns.
-
-    Args:
-        board: The current board.
-
-    Returns:
-        A list of strings representing columns.
-    """
-    col_list = []
-    n = len(board)
-
-    for i in range(n):
-        col = []
-        for row in board:
-            col.append(row[i])
-        col_string = ''.join(col)
-        col_list.append(col_string)
-
-    return col_list
-
-def row_to_string(board):
-    """
-    Converts the board into a list of strings representing rows.
-
-    Args:
-        board: The current board.
-
-    Returns:
-        A list of strings representing rows.
-    """
-    row_list = []
-    for row in board:
-        row_string = ''.join(row)
-        row_list.append(row_string)
-    return row_list
 
 def board_to_string(board):
     """
@@ -401,41 +342,92 @@ def board_to_string(board):
     Returns:
         Four lists of strings representing rows, columns, left diagonals and right diagonals.
     """
-    row_list = row_to_string(board)
-    col_list = col_to_string(board)
-    left_diag, right_diag = diagonals_to_strings(board)
+    row_list = conversions.row_to_string(board)
+    col_list = conversions.col_to_string(board)
+    left_diag, right_diag = conversions.diagonals_to_strings(board)
     return row_list, col_list, left_diag, right_diag
 
 def play_the_game(board, heuristics, possible_moves):
     """
     Asks the player to make a move and calls the AI to make a move. 
-    Makes the final moves and passes the continution information 
+    Makes the final moves and passes the continuation information 
     of the game to the roll_the_game function.
 
     Args:
         board: The current board.
         heuristics: A dictionary with patterns and values.
+        possible_moves: A list of possible moves.
 
     Returns:
         Returns 3 for a draw, 1 for a win by the human, 
-        or 2 for a win by the AI, and 0 if the game is not over. 
+        or 2 for a win by the AI, and 0 and "ai" as a ai move if the game is not over. 
     """
     draw_board(board)
 
     while True:
-        move = input("Move pls, row first then col (row = 1-6, col = a-f) (example: 1a or 5b): ")
-        if move[0] not in "123456" or move[1] not in "abcdef" or board[int(move[0])-1][ord(move[1])-97] != " ":
+        move = input("Your move: ")
+        if len(move) == 2:
+            if move[0] in "123456789" and move[1] in "abcdefghijklnmopqrst":
+                row = int(move[0])-1
+                col = ord(move[1])-97
+                if board[row][col] != " ":
+                    print("Invalid move, try again.")
+                    continue
+                break
+            if move[1] in "123456789" and move[0] in "abcdefghijklnmopqrst":
+                col = ord(move[0])-97
+                row = int(move[1])-1
+                if board[row][col] != " ":
+                    print("Invalid move, try again.")
+                    continue
+                break
+            else:
+                print("Invalid move, try again.")
+                continue
+        if len(move) == 3:
+            if move[0] == "1" and move[1] in "0123456789" and move[2] in "abcdefghijklnmopqrst":
+                row = int(move[:2])-1
+                col = ord(move[2])-97
+                if board[row][col] != " ":
+                    print("Invalid move, try again.")
+                    continue
+                break
+            if move[0] == "2" and move[1] == "0" and move[2] in "abcdefghijklnmopqrst":
+                row = int(move[:2])-1
+                col = ord(move[2])-97
+                if board[row][col] != " ":
+                    print("Invalid move, try again.")
+                    continue
+                break
+            if move[0] in "abcdefghijklnmopqrst" and move[1] == "1" and move[2] in "0123456789":
+                col = ord(move[0])-97
+                row = int(move[1:])-1
+                if board[row][col] != " ":
+                    print("Invalid move, try again.")
+                    continue
+                break
+            if move[0] in "abcdefghijklnmopqrst" and move[1] == "2" and move[2] == "0":
+                col = ord(move[0])-97
+                row = int(move[1:])-1
+                if board[row][col] != " ":
+                    print("Invalid move, try again.")
+                    continue
+                break
+            else:
+                print("Invalid move, try again.")
+                continue
+        else:
             print("Invalid move, try again.")
             continue
-        break
-    board[int(move[0])-1][ord(move[1])-97] = "O"
-    
-    possible_moves = update_possible_moves(board, possible_moves, (int(move[0])-1, ord(move[1])-97))
-    draw_board(board)
-    last_move = (int(move[0])-1, ord(move[1])-97)
-    depth = 5
-    ai, value = ai_makes_move(board, heuristics, last_move, possible_moves, depth)
+    board[row][col] = "O"
 
+    last_move = (row, col)
+    possible_moves = update_possible_moves(board, possible_moves, last_move)
+    draw_board(board)
+    
+    depth = 4
+    ai, value = ai_makes_move(board, heuristics, last_move, possible_moves, depth)
+   
     if ai is None:
         return 1
     if value == 1111111111*((depth-1)**(depth-1)):
@@ -446,7 +438,7 @@ def play_the_game(board, heuristics, possible_moves):
     if value is None:
         return 3
     board[int(ai[0])][int(ai[1])] = "X"
-    return 0
+    return 0, ai
 
 def roll_the_game(board, heuristics, possible_moves):
     """
@@ -455,22 +447,25 @@ def roll_the_game(board, heuristics, possible_moves):
     Args:
         board: The current board.
         heuristics: A dictionary with patterns and values.
+        possible_moves: A list of possible moves.
 
     Returns:
         Breaks the game roll and prints the result in case of a win or draw.
     """
     while True:
-        hero = play_the_game(board, heuristics, possible_moves)
+        hero, ai = play_the_game(board, heuristics, possible_moves)
         if hero == 1:
-            print("Game over, O won the game!")
+            print("Game over, YOU won the game!")
             break
         if hero == 2:
-            print("Game over, X won the game!")
+            print("Game over, AI won the game!")
             break
         if hero == 3:
             print("Game over, draw!")
             break
+        possible_moves = update_possible_moves(board, possible_moves, ai)
         continue
+        
     draw_board(board)
     return "Hennesy"
 
@@ -484,92 +479,10 @@ def draw_board(board):
     Returns:
         None
     """
-    print("   " + " ".join("a b c d e f".split()))
+    print("    " + " ".join("a b c d e f g h i j k l m n o p q r s t".split()))
     for i, row in enumerate(board, 1):
-         print(f"{i} " + "|" + "|".join(row) + "|")
+        if i < 10:
+            print(f" {i}:" + "|" + "|".join(row) + "|")
+        else:
+            print(f"{i}:" + "|" + "|".join(row) + "|")
     print("")
-
-if __name__ == "__main__":
-    #board_size = 10
-    #make_a_board = [[" " for i in range(board_size)] for j in range(board_size)]
-    board0 = [
-    [" "," "," "," "," "," "],
-    [" "," "," "," "," "," "],
-    [" ","X","X","X"," "," "],
-    [" "," "," "," "," "," "],
-    [" ","O","O","O"," "," "],
-    [" "," "," "," "," "," "]
-    ]
-    
-    board = [
-    [" "," "," "," "," ","O"],
-    [" ","X"," ","O","O"," "],
-    [" ","X","O","O"," "," "],
-    [" ","X"," ","O","X"," "],
-    ["O"," ","O","O","O","X"],
-    ["X","X","X"," "," "," "]
-    ]
-
-    board1 = [
-    [" ","O","O","X","X","X"],
-    ["X","X","X","O","O","O"],
-    ["O","O","O","X","X","X"],
-    ["X","X","X","O","O","O"],
-    ["O","O","O","X","X","X"],
-    ["X","X","X","O","O","O"],
-    ]
-
-    board2 = [
-    [" ","O","O","X","X","X"],
-    [" ","X","X","O","O","O"],
-    ["O","O","O","X","X","X"],
-    ["X","X","X","O","O","O"],
-    ["O","O","O","X","X","X"],
-    ["X","X","X","O","O","O"],
-    ]
-
-    board3 = [
-    [" ","X"," "," ","O","O"],
-    ["O"," ","X","O","O","X"],
-    [" "," ","O"," "," "," "],
-    [" "," "," ","X","X"," "],
-    ["O"," ","X","O","O","X"],
-    ["X","X","X"," ","O"," "]
-    ]
-
-    heuristics = {
-        " XXXX ": 50000000,
-        " OOOO ": -50000000,
-        "XXXX ": 1000000,
-        " XXXX": 1000000,
-        "OOOO ": -1000000,
-        " OOOO": -1000000,
-        "XX XX": 1000000,
-        "OO OO": -1000000,
-        "X XXX": 1000000,
-        "O OOO": -1000000,
-        "XXX X": 1000000,
-        "OOO O": -1000000,
-        "  XXX  ": 50000,
-        "  OOO  ": -50000,
-        " XXX ": 20000,
-        " OOO ": -20000,
-        " XX ": 40,
-        " OO ": -40,
-        " X ": 1,
-        " O ": -1  
-    }
-
-    possible_moves = []
-    def make_possible_moves(board):
-        for row in range(len(board)):
-            for col in range(len(board)):
-                if board[row][col] != " ":
-                    possible_move = update_possible_moves(board, possible_moves, (row, col))
-        return possible_move
-
-    roll_the_game(board0, heuristics, make_possible_moves(board0))
-    roll_the_game(board, heuristics, make_possible_moves(board))
-    roll_the_game(board1, heuristics, make_possible_moves(board1))
-    roll_the_game(board2, heuristics, make_possible_moves(board2))
-    #roll_the_game(board3, heuristics, make_possible_moves(board3))
