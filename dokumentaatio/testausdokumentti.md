@@ -15,8 +15,11 @@ Ohjelmaa tehtäessä ohjelman testaaminen koostui pääasiassa manuaalisesti teh
 
 ## TESTiKATTAVUUS
 - Sovelluksen testikattavuus on 99%, kun ulkopuolelle on rajattu testaukseen huonosti soveltuvat funktiot ja tiedosto. Testikattavuusraportin perusteella yksikään kohta ei ole jäänyt kokonaan testaamatta. Testikattavuuden prosentteja laskee osittaiset puutteet testikattavuudessa. Tämän testikattavuuden ulkopuolelle on jätetty tiedosto "main.py" sekä tiedostosta "xoxo.py" funktiot "draw_board()", "roll_the_game()", "play_the_game()" ja "ai_makes_move()". Myös loppuosa funktiosta "evaluate_board()" on jätetty testikattavuuden ulkopuolelle.
+
 ![](./pics/test_coverage.png)
+
 - Ilman testikattavuuden rajauksia testikattavuus on 66%
+
 ![](./pics/test_coverage_without_outruling.png)
 
 ## MANUAALINEN JÄRJESTELMÄTESTAUS
